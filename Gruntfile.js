@@ -22,6 +22,17 @@ module.exports = function(grunt) {
         });
     });
 
+    grunt.registerTask('publishToHeroku', 'publish', function() {
+
+        var exec = require('child_process').exec;
+        var cb = this.async();
+
+        exec('git push heruko master', {cwd: '../../socialpodcast'}, function(err, stdout, stderr) {
+            console.log(stdout);
+            cb();
+        });
+    });
+
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
