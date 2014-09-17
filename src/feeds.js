@@ -6,7 +6,7 @@ var feeds = [
         hostname: 'www.startuppodden.se',
         port: 80,
         path: '/feed/',
-        method: 'POST'
+        method: 'GET'
     }];
 
 module.exports = feeds;

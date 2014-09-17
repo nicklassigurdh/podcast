@@ -16,6 +16,18 @@
         <link rel="stylesheet" href="css/main.css">
         <script src="js/vendor/modernizr-2.6.2.min.js"></script>
         <script src="js/vendor/require.js" data-main="js/main"></script>
+
+        <!-- TEMPLATES -->
+
+        <script id="podsTemplate" type="x-tmpl-mustache">
+            <ul>
+            {{ #pods }}
+                <li>{{link}}, likes: {{likes}}, shares: {{shares}}</li>
+            {{ /pods }}
+            </ul>
+        </script>
+
+        <!-- /TEMPLATES -->
     </head>
     <body>
         <!--[if lt IE 7]>
@@ -23,7 +35,9 @@
         <![endif]-->
 
         <!-- Add your site or application content here -->
-        <p>Hello world! This is HTML5 Boilerplate.</p>
+        <div id="target"></div>
+        <div><a href="#" class="sort-Likes">Sortera efter Likes</a></div>
+        <div><a href="#" class="sort-Shares">Sortera efter Shares</a></div>
 
 
     </body>

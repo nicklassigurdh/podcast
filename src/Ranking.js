@@ -1,9 +1,10 @@
 /* deps */
 var http = require('http');
+var https = require('https');
 var xml2js = require('xml2js');
 var XMLparser = new xml2js.Parser();
+var log = require('./log');
 var FB = require('fb');
-FB.setAccessToken('CAACEdEose0cBANa44vHw42RU2oqNrt9gtGTIsnsMPajXguDzeqxi33ylXUVQ6or1P2CTOfuP3RdxqjjacZBbslO1HOKu352mINEZBHHNZCOGc6RWBNLj8FZCkimx6YZCNgKcjx8jZBdB7nfB6oGerOlSZC3QJDWJuKlkNXsSJHdQkYsQuWJMOdXFMZAfR7xLWcA4mOufA6RenZBsUaRXj0AwzaNxnH53hZCssZD');
 
 /* function */
 var Ranking = function () {
@@ -17,9 +18,9 @@ var Ranking = function () {
 
     self.facebookTooken = '';
 
-    self.doRequest = function(siteObj, callback) {
+    self.doRequest = function(siteObj, callback, h) {
         //make http request to feeds[i] and parse the result for links.
-        var req = http.request(siteObj, function(response) {
+        var req = h.request(siteObj, function(response) {
             //console.log('STATUS: ' + response.statusCode);
             //console.log('HEADERS: ' + JSON.stringify(response.headers));
 
@@ -39,17 +40,37 @@ var Ranking = function () {
                 });
             }else{
                 console.log('there is some problem with a request: '+ JSON.stringify(siteObj));
+                console.log('STATUS: ' + response.statusCode);
+                console.log('HEADERS: ' + JSON.stringify(response.headers));
+                log.add('there is some problem with a request: '+ JSON.stringify(siteObj));
             }
         });
 
         req.on('error', function(e) {
             console.log('problem with request: %S',  JSON.stringify(e));
+            log.add('problem with request: %S',  JSON.stringify(e));
         });
 
         req.end();
     };
 
+    self.ready = false;
+
+    //first we set the acces token.
+    self.doRequest({
+        hostname: 'graph.facebook.com',
+        port: 443,
+        path: '/oauth/access_token?client_id=1522652354641503&client_secret=46efc47a621886e9a43fc2ed1dafe17d&grant_type=client_credentials',
+        method: 'GET'
+    }, function (token){
+        console.log('token: '+token);
+        FB.setAccessToken(token);
+        self.ready = true;
+    }, https);
 };
+
+https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&fb_exchange_token="+accessToken+"&client_id="+appid+"&client_secret="+appsecret;
+
 var p = Ranking.prototype;
 
 p.fillCacheWithtRanking = function (feeds) {
@@ -74,6 +95,7 @@ p.fillCacheWithtRanking = function (feeds) {
                     var callback = function (res) {
                         if(!res || res.error) {
                             console.log(!res ? 'error occurred' : res.error);
+                            log.add(!res ? 'error occurred' : res.error);
                             return;
                         }
 
@@ -87,6 +109,7 @@ p.fillCacheWithtRanking = function (feeds) {
                     };
 
                     console.log('get facebook data for: '+tmpURL);
+                    log.add('get facebook data for: '+tmpURL);
                     FB.api('fql', { q: 'SELECT share_count, like_count, comment_count, total_count, url FROM link_stat WHERE url="'+ tmpURL +'"'}, callback);
 
                 }
@@ -94,7 +117,8 @@ p.fillCacheWithtRanking = function (feeds) {
         };
 
         console.log('get feed: '+ feeds[i].hostname);
-        self.doRequest(feeds[i], parsFeedsGetRanking);
+        log.add('get feed: '+ feeds[i].hostname);
+        self.doRequest(feeds[i], parsFeedsGetRanking, http);
 
     }
 }
