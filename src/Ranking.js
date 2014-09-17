@@ -55,6 +55,7 @@ var Ranking = function () {
     };
 
     self.ready = false;
+    self.accessToken = '';
 
     //first we set the acces token.
     self.doRequest({
@@ -64,12 +65,12 @@ var Ranking = function () {
         method: 'GET'
     }, function (token){
         console.log('token: '+token);
-        FB.setAccessToken(token);
+        console.log('token-replace: '+token.replace("access_token=", ""));
+        FB.setAccessToken(token.replace("access_token=", ""));
+        self.accessToken = token.replace("access_token=", "");
         self.ready = true;
     }, https);
 };
-
-https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&fb_exchange_token="+accessToken+"&client_id="+appid+"&client_secret="+appsecret;
 
 var p = Ranking.prototype;
 
@@ -93,25 +94,49 @@ p.fillCacheWithtRanking = function (feeds) {
                     self.cachedRanking.rankings.push(tmpRankingObj);
 
                     var callback = function (res) {
+
+                        console.log(res.share.share_count);
+
                         if(!res || res.error) {
                             console.log(!res ? 'error occurred' : res.error);
                             log.add(!res ? 'error occurred' : res.error);
                             return;
                         }
 
+/*
+                        {
+                            "og_object":
+                            {
+                                "type":"website",
+                                "updated_time":"2014-09-14T12:07:47+0000",
+                                "url":"http://www.startuppodden.se/2014/09/19-hampus-jakobsson-tat-the-astonishing-tribe-brisk-io/",
+                                "id":"827506267279917"
+                            },
+                            "share":
+                            {
+                                "comment_count":0,
+                                "share_count":11
+                            },
+                            "id":"http://www.startuppodden.se/2014/09/19-hampus-jakobsson-tat-the-astonishing-tribe-brisk-io/"}
+                            */
+
                         for(var i = 0; i < self.cachedRanking.rankings.length; i++){
-                            if(self.cachedRanking.rankings[i].link === res.data[0].url){
-                                self.cachedRanking.rankings[i].shares = res.data[0].share_count;
-                                self.cachedRanking.rankings[i].likes = res.data[0].like_count;
-                                self.cachedRanking.rankings[i].total = res.data[0].total_count;
+                            if(self.cachedRanking.rankings[i].link === res.id){
+                                self.cachedRanking.rankings[i].shares = res.share.share_count;
+                                //self.cachedRanking.rankings[i].likes = res.data[0].like_count;
+                                //self.cachedRanking.rankings[i].total = res.data[0].total_count;
                             };
                         }
                     };
 
                     console.log('get facebook data for: '+tmpURL);
                     log.add('get facebook data for: '+tmpURL);
-                    FB.api('fql', { q: 'SELECT share_count, like_count, comment_count, total_count, url FROM link_stat WHERE url="'+ tmpURL +'"'}, callback);
 
+                    FB.api('/v2.1/'+tmpURL, {
+                        access_token : self.accessToken
+                    }, function(response) {
+                        callback(response);
+                    });
                 }
             });
         };

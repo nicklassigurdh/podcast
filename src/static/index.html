@@ -22,7 +22,8 @@
         <script id="podsTemplate" type="x-tmpl-mustache">
             <ul>
             {{ #pods }}
-                <li>{{link}}, likes: {{likes}}, shares: {{shares}}</li>
+                <!-- li>{{link}}, likes: {{likes}}, shares: {{shares}}</li -->
+                <li>{{link}}, shares: {{shares}}</li>
             {{ /pods }}
             </ul>
         </script>
@@ -36,7 +37,7 @@
 
         <!-- Add your site or application content here -->
         <div id="target"></div>
-        <div><a href="#" class="sort-Likes">Sortera efter Likes</a></div>
+        <!--- div><a href="#" class="sort-Likes">Sortera efter Likes</a></div -->
         <div><a href="#" class="sort-Shares">Sortera efter Shares</a></div>
 
 
